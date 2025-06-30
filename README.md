@@ -1,6 +1,6 @@
 # Algorithm Solver - Node.js TypeScript Project
 
-A Node.js application built with Express.js and TypeScript for solving algorithms and coding challenges. This project includes both **traditional algorithm implementations** and a **distributed consensus algorithm** for the ball sorting problem.
+A Node.js application built with Express.js and TypeScript for implementing a **distributed consensus algorithm** for the ball sorting problem.
 
 ## 🎯 Featured: Distributed Ball Sorting Consensus Algorithm
 
@@ -107,27 +107,6 @@ This project also includes implementations of classic algorithms:
 ### Data Structures
 - Stack, Queue, Linked List Node, Binary Tree Node
 
-## 🏗️ **Project Structure**
-
-```
-puzzle/
-├── src/
-│   ├── consensus/                 # 🎯 Distributed consensus algorithm
-│   │   ├── standalone-consensus.ts   # Core algorithm implementation
-│   │   └── types.ts                  # TypeScript interfaces
-│   ├── algorithms/               # Classic algorithm implementations
-│   │   ├── sorting.ts               # Sorting algorithms
-│   │   └── searching.ts             # Search algorithms
-│   ├── routes/                   # Express.js routes
-│   │   └── algorithms.ts            # Algorithm API endpoints
-│   └── simple-app.ts            # Express.js server entry point
-├── public/
-│   └── index.html               # 🎮 Interactive consensus visualization
-├── tests/                       # Comprehensive test suite
-├── CONSENSUS_SOLUTION.md        # 📖 Detailed algorithm documentation
-└── README.md                    # This file
-```
-
 ## 🧪 **Testing & Verification**
 
 ### Automated Test Suite
@@ -171,7 +150,9 @@ This implementation demonstrates:
 
 ## 📊 **API Documentation**
 
-### Traditional Algorithms API
+### Simple Algorithm API
+
+The application also provides basic algorithm endpoints:
 
 ```bash
 # Get available algorithms
