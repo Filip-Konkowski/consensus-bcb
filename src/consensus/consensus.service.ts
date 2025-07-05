@@ -29,26 +29,29 @@ export class ConsensusService extends BaseConsensusService {
       validationService,
       systemStateService
     );
+    
+    // Initialize logger after calling super
+    this.logger = new Logger(ConsensusService.name);
   }
 
   protected onProcessesInitialized(): void {
-    this.logger.log('Processes initialized with starting distributions');
+    this.logger?.log('Processes initialized with starting distributions');
   }
 
   protected onConsensusStarting(): void {
-    this.logger.log('🚀 Starting distributed ball sorting consensus algorithm');
+    this.logger?.log('🚀 Starting distributed ball sorting consensus algorithm');
   }
 
   protected onInitialProcessStates(): void {
-    this.logger.log('--- Initial Process States ---');
+    this.logger?.log('--- Initial Process States ---');
   }
 
   protected onIterationCheck(iterationCount: number): void {
-    this.logger.log(`--- Iteration ${iterationCount} - System Check ---`);
+    this.logger?.log(`--- Iteration ${iterationCount} - System Check ---`);
   }
 
   protected onConsensusCompleted(iterationCount: number): void {
-    this.logger.log(`🎉 Consensus algorithm completed in ${iterationCount} iterations!`);
+    this.logger?.log(`🎉 Consensus algorithm completed in ${iterationCount} iterations!`);
   }
 
   protected onWarning(message: string): void {
