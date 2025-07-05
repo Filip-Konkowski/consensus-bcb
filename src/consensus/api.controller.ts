@@ -15,8 +15,8 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
  */
 @ApiTags('consensus')
 @Controller('consensus')
-export class ConsensusController {
-  private readonly logger = new Logger(ConsensusController.name);
+export class ApiController {
+  private readonly logger = new Logger(ApiController.name);
 
   // Simple mock state for now (until we fix the complex ConsensusService)
   private mockState = {

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { ConsensusController } from './consensus/consensus.controller';
+import { ApiController } from './consensus/api.controller';
 
 @Module({
   imports: [
@@ -11,6 +11,6 @@ import { ConsensusController } from './consensus/consensus.controller';
       serveRoot: '/',
     }),
   ],
-  controllers: [ConsensusController],
+  controllers: [ApiController],
 })
 export class AppModule {}
