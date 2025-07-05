@@ -16,6 +16,7 @@ Three independent processes, each starting with mixed colored balls, must reach 
 
 ### ✅ **Solution Features**
 - ✅ **Express.js + TypeScript** (clean, minimal architecture)
+- ✅ **Modular Service Architecture** with clean separation of concerns
 - ✅ **Three Independent Processes** with specified ball distributions
 - ✅ **No Global Knowledge** - processes start blind to others
 - ✅ **One Ball Per Message** constraint enforced
@@ -30,7 +31,7 @@ Three independent processes, each starting with mixed colored balls, must reach 
 # Install dependencies
 npm install
 
-# Start the consensus algorithm server
+# Start the Express server with consensus algorithm
 npm run dev
 
 # Open browser to see the visualization
@@ -38,10 +39,17 @@ open http://localhost:3000
 
 # Run comprehensive tests
 npm test
+
+# Build the project
+npm run build
+
+# Start production server
+npm start
 ```
 
 ## 🌐 **Consensus Algorithm Endpoints**
 
+### Express.js API
 ```bash
 # Start the consensus algorithm
 curl -X POST http://localhost:3000/consensus/start
@@ -63,14 +71,30 @@ The web interface shows:
 - **Live Metrics**: Potential function, exchange count, completion status  
 - **Algorithm Progress**: Step-by-step visualization of ball exchanges
 - **Convergence Proof**: Demonstrates the potential function decreasing
+- **Service Interactions**: Visual representation of modular service calls
 
 ## 🔬 **Technical Implementation**
+
+### Modular Service-Based Architecture
+- **BaseConsensusService**: Core algorithm logic without framework dependencies
+- **StandaloneConsensusService**: Lightweight wrapper for Express.js integration
+- **Specialized Services**: Modular design with focused responsibilities
+
+### Service Components
+```typescript
+- ColorSelectionService     // Handles color computation and conflict resolution
+- PartnerSelectionService   // Manages partner selection algorithms
+- MessageHandlingService    // Processes all message types (REQUEST/SEND/DONE)
+- ValidationService         // Ball conservation and system state validation
+- SystemStateService        // State management and persistence
+```
 
 ### Core Algorithm Properties
 - **Self-Stabilizing**: Guaranteed convergence from any initial state
 - **Distributed**: No central coordinator or shared state
 - **Message-Passing**: Asynchronous communication between processes
 - **Potential Function**: Φ = total miscolored balls (proves termination)
+- **Modular Design**: Clean separation of concerns for maintainability
 
 ### Process Behavior
 ```typescript
@@ -81,6 +105,31 @@ The web interface shows:
 5. Check for monochrome state → broadcast DONE if achieved
 6. Repeat until all processes are monochrome
 ```
+
+## 🏗️ **Architecture Overview**
+
+### Project Structure
+```
+src/
+├── consensus/
+│   ├── base-consensus.service.ts       # Core algorithm logic (framework-agnostic)
+│   ├── standalone-consensus.ts         # Express.js wrapper service
+│   ├── services/                       # Modular service components
+│   │   ├── color-selection.service.ts  # Color computation and conflict resolution
+│   │   ├── partner-selection.service.ts # Partner selection algorithms
+│   │   ├── message-handling.service.ts # Message processing (REQUEST/SEND/DONE)
+│   │   ├── validation.service.ts       # Ball conservation and state validation
+│   │   ├── system-state.service.ts     # State management and persistence
+│   │   └── index.ts                    # Service exports
+│   └── types.ts                        # TypeScript type definitions
+├── routes/                             # Express.js routes
+└── simple-app.ts                       # Express.js application entry point
+```
+
+### Design Patterns
+- **Inheritance**: `BaseConsensusService` → `StandaloneConsensusService`
+- **Service Layer**: Modular services with single responsibilities
+- **Strategy Pattern**: Pluggable algorithm components
 
 ## 📝 **Test Results**
 
@@ -112,8 +161,9 @@ This project also includes implementations of classic algorithms:
 ### Automated Test Suite
 ```bash
 npm test                    # Run all tests
-npm test:consensus         # Run consensus-specific tests
-npm test:coverage          # Coverage report
+npm run test:consensus     # Run consensus-specific tests
+npm run test:coverage      # Coverage report
+npm run test:watch         # Run tests in watch mode
 ```
 
 ### Test Categories
@@ -122,21 +172,27 @@ npm test:coverage          # Coverage report
 - **Invariants**: Maintain ball count and color distribution
 - **Constraints**: Verify one-ball-per-message compliance
 - **Performance**: Measure convergence time and exchanges
+- **Service Integration**: Test modular service interactions
+- **Architecture**: Validate BaseConsensusService inheritance
 
 ## 📖 **Documentation**
 
 - **[CONSENSUS_SOLUTION.md](./CONSENSUS_SOLUTION.md)** - Detailed algorithm analysis and theoretical background
+- **[REFACTORING_SUMMARY.md](./REFACTORING_SUMMARY.md)** - Architecture documentation and service design
 - **Interactive UI** - Real-time visualization with algorithm explanations
 - **Code Comments** - Comprehensive documentation throughout implementation
+- **Service Documentation** - Detailed API documentation for each service module
 
 ## 🎓 **Educational Value**
 
 This implementation demonstrates:
 - **Distributed Systems Theory** - Self-stabilizing algorithms
 - **Consensus Algorithms** - Message-passing without global state
-- **TypeScript/Node.js** - Modern backend development
-- **Real-time Visualization** - Algorithm progress monitoring
-- **Test-Driven Development** - Comprehensive verification
+- **TypeScript/Node.js** - Modern backend development with Express.js
+- **Modular Architecture** - Clean service-based design patterns
+- **Real-time Communication** - WebSocket integration for live updates
+- **Test-Driven Development** - Comprehensive verification and inheritance testing
+- **Software Engineering** - Clean code principles and maintainable architecture
 
 ## 🔮 **Future Enhancements**
 
@@ -170,26 +226,28 @@ curl http://localhost:3000/api/algorithms/fibonacci/10
 ### Development Commands
 
 ```bash
-npm run build           # Compile TypeScript to JavaScript
-npm run dev            # Start development server with hot reload  
-npm start              # Start production server
-npm test               # Run test suite
-npm run test:watch     # Run tests in watch mode
-npm run test:coverage  # Run tests with coverage report
-npm run clean          # Remove compiled files
+npm run build              # Compile TypeScript to JavaScript
+npm run dev               # Start Express.js development server
+npm start                 # Start production server
+npm test                  # Run test suite
+npm run test:watch        # Run tests in watch mode
+npm run test:coverage     # Run tests with coverage report
+npm run clean             # Remove compiled files
 ```
 
 ## 🏆 **Technical Achievement**
 
 This project successfully implements a **distributed consensus algorithm** that:
 
-✅ **Meets All Requirements**: NestJS, three processes, no global knowledge, one ball per message  
+✅ **Meets All Requirements**: Express.js + TypeScript, three processes, no global knowledge, one ball per message  
 ✅ **Guarantees Convergence**: Mathematical proof via potential function  
-✅ **Provides Visualization**: Real-time UI showing algorithm progress  
-✅ **Includes Comprehensive Tests**: Automated verification of correctness  
-✅ **Offers Educational Value**: Clear documentation and implementation  
+✅ **Provides Visualization**: Real-time UI with interactive interface  
+✅ **Includes Comprehensive Tests**: Automated verification of correctness and architecture  
+✅ **Offers Educational Value**: Clear documentation and modular implementation  
+✅ **Demonstrates Best Practices**: Clean architecture, service-based design, inheritance patterns  
+✅ **Supports Express.js**: Lightweight and efficient web framework  
 
-The solution bridges **theoretical computer science** with **practical software engineering**, demonstrating both deep algorithmic understanding and modern development practices.
+The solution bridges **theoretical computer science** with **practical software engineering**, demonstrating both deep algorithmic understanding and modern development practices with clean, maintainable code architecture.
 
 ---
 

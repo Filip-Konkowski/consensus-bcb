@@ -1,5 +1,4 @@
 import express, { Request, Response } from 'express';
-import { algorithmRoutes } from './routes/algorithms';
 import { StandaloneConsensusService } from './consensus/standalone-consensus';
 import path from 'path';
 
@@ -15,9 +14,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static files for the consensus UI
 app.use(express.static(path.join(__dirname, '../public')));
-
-// Routes for original algorithms
-app.use('/api/algorithms', algorithmRoutes);
 
 // Consensus API endpoints
 app.post('/consensus/start', async (req: Request, res: Response) => {

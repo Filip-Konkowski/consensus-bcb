@@ -323,6 +323,8 @@
             if (isRunning) return;
             
             try {
+                console.log('🚀 Starting consensus algorithm from browser');
+                
                 const startBtn = document.getElementById('startBtn');
                 startBtn.disabled = true;
                 startBtn.innerHTML = 'Starting... <span class="loading"></span>';
@@ -335,6 +337,7 @@
                 });
                 
                 if (response.ok) {
+                    console.log('✅ Consensus algorithm started successfully');
                     isRunning = true;
                     startPolling();
                     updateStatus('Consensus algorithm running...', 'running');
@@ -342,7 +345,7 @@
                     throw new Error('Failed to start consensus');
                 }
             } catch (error) {
-                console.error('Error starting consensus:', error);
+                console.error('❌ Error starting consensus:', error);
                 updateStatus('Error starting consensus algorithm', 'idle');
                 document.getElementById('startBtn').disabled = false;
                 document.getElementById('startBtn').innerHTML = 'Start Consensus';
