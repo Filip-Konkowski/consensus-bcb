@@ -1,8 +1,10 @@
+import { Injectable } from '@nestjs/common';
 import { Message, ProcessState, Color } from '../types';
 
 /**
  * Service responsible for message handling and processing logic
  */
+@Injectable()
 export class MessageHandlingService {
   
   /**

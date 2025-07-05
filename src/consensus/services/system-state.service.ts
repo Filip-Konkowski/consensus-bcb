@@ -1,8 +1,10 @@
+import { Injectable } from '@nestjs/common';
 import { Color, ProcessState, Message, SystemState } from '../types';
 
 /**
  * Service responsible for system state management and calculations
  */
+@Injectable()
 export class SystemStateService {
   
   /**

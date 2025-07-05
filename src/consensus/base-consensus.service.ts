@@ -1,3 +1,4 @@
+import { Injectable, Logger } from '@nestjs/common';
 import { Color, ProcessId, ProcessState, Message, SystemState } from './types';
 import {
   ColorSelectionService,
@@ -11,6 +12,7 @@ import {
  * Base Consensus Service Implementation
  * Contains the core algorithm logic without framework dependencies
  */
+@Injectable()
 export class BaseConsensusService {
   protected processes: ProcessState[] = [];
   protected messageQueue: Message[] = [];
@@ -27,18 +29,24 @@ export class BaseConsensusService {
 
   // Initial ball distributions as specified
   protected readonly initialDistributions: Record<ProcessId, Color[]> = {
-    1: ["R","R","R","G","G","G","B","B","B","R", "C"],
-    2: ["G","G","G","R","R","B","B","B","R","R", "C"],
-    3: ["B","B","B","B","R","G","G","G","G","R", "C"]
+    1: ["R","R","R","G","G","G","B","B","B","R"],
+    2: ["G","G","G","R","R","B","B","B","R","R"],
+    3: ["B","B","B","B","R","G","G","G","G","R"]
   };
 
-  constructor() {
-    // Initialize services
-    this.colorSelectionService = new ColorSelectionService();
-    this.partnerSelectionService = new PartnerSelectionService(this.colorSelectionService);
-    this.messageHandlingService = new MessageHandlingService();
-    this.validationService = new ValidationService();
-    this.systemStateService = new SystemStateService();
+  constructor(
+    colorSelectionService: ColorSelectionService,
+    partnerSelectionService: PartnerSelectionService,
+    messageHandlingService: MessageHandlingService,
+    validationService: ValidationService,
+    systemStateService: SystemStateService
+  ) {
+    // Inject services instead of creating them
+    this.colorSelectionService = colorSelectionService;
+    this.partnerSelectionService = partnerSelectionService;
+    this.messageHandlingService = messageHandlingService;
+    this.validationService = validationService;
+    this.systemStateService = systemStateService;
     
     this.initializeProcesses();
   }

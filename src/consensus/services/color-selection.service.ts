@@ -1,8 +1,10 @@
+import { Injectable } from '@nestjs/common';
 import { Color, ProcessId, ProcessState, Message } from '../types';
 
 /**
  * Service responsible for color selection logic and conflict resolution
  */
+@Injectable()
 export class ColorSelectionService {
   
   /**

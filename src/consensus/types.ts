@@ -1,4 +1,4 @@
-export type Color = 'R' | 'G' | 'B' | 'C';
+export type Color = 'R' | 'G' | 'B' ;
 export type ProcessId = 1 | 2 | 3;
 
 export interface ProcessState {

@@ -1,9 +1,11 @@
+import { Injectable } from '@nestjs/common';
 import { ProcessState, ProcessId } from '../types';
 import { ColorSelectionService } from './color-selection.service';
 
 /**
  * Service responsible for partner selection and scoring logic
  */
+@Injectable()
 export class PartnerSelectionService {
   
   constructor(private colorSelectionService: ColorSelectionService) {}
