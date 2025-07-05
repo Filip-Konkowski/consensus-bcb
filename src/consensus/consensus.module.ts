@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ConsensusService } from './consensus.service';
 import { BaseConsensusService } from './base-consensus.service';
 import { ApiController } from './api.controller';
 import { ColorSelectionService } from './services/color-selection.service';
@@ -11,7 +10,6 @@ import { SystemStateService } from './services/system-state.service';
 @Module({
   controllers: [ApiController],
   providers: [
-    ConsensusService,
     BaseConsensusService,
     ColorSelectionService,
     PartnerSelectionService,
@@ -20,7 +18,6 @@ import { SystemStateService } from './services/system-state.service';
     SystemStateService,
   ],
   exports: [
-    ConsensusService,
     BaseConsensusService,
     ColorSelectionService,
     PartnerSelectionService,

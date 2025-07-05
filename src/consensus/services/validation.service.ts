@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Color, ProcessState, Message } from '../types';
+import { Color, ProcessId, ProcessState, Message } from '../types';
 
 /**
  * Service responsible for system validation and logging
@@ -10,7 +10,7 @@ export class ValidationService {
   /**
    * Validate that total ball count is preserved (conservation invariant)
    */
-  validateBallConservation(processes: ProcessState[], messageQueue: Message[]): boolean {
+  validateBallConservation(processes: ProcessState[], messageQueue: Message[], initialDistributions?: Record<ProcessId, Color[]>): boolean {
     const currentCounts = new Map<Color, number>();
     let totalBalls = 0;
     
@@ -30,9 +30,28 @@ export class ValidationService {
       }
     }
     
-    // Expected: 10 of each color, 30 total
-    const expectedTotal = 30;
-    const expectedPerColor = 10;
+    // Calculate expected counts from initial distributions if provided
+    let expectedTotal = 30;
+    const expectedColorCounts = new Map<Color, number>();
+    
+    if (initialDistributions) {
+      expectedTotal = 0;
+      // Reset expected counts
+      expectedColorCounts.clear();
+      
+      // Calculate expected counts from initial distributions
+      for (const [processId, distribution] of Object.entries(initialDistributions)) {
+        expectedTotal += distribution.length;
+        for (const color of distribution) {
+          expectedColorCounts.set(color, (expectedColorCounts.get(color) || 0) + 1);
+        }
+      }
+    } else {
+      // Default expected counts for backward compatibility
+      expectedColorCounts.set('R', 10);
+      expectedColorCounts.set('G', 10);
+      expectedColorCounts.set('B', 10);
+    }
     
     let isValid = true;
     if (totalBalls !== expectedTotal) {
@@ -40,10 +59,10 @@ export class ValidationService {
       isValid = false;
     }
     
-    for (const color of ['R', 'G', 'B'] as Color[]) {
+    for (const [color, expectedCount] of expectedColorCounts.entries()) {
       const count = currentCounts.get(color) || 0;
-      if (count !== expectedPerColor) {
-        console.error(`❌ COLOR CONSERVATION VIOLATED: Expected ${expectedPerColor} ${color} balls, found ${count}`);
+      if (count !== expectedCount) {
+        console.error(`❌ COLOR CONSERVATION VIOLATED: Expected ${expectedCount} ${color} balls, found ${count}`);
         isValid = false;
       }
     }
@@ -78,7 +97,8 @@ export class ValidationService {
     processes: ProcessState[], 
     messageQueue: Message[], 
     totalExchanges: number, 
-    calculatePotentialFunction: () => number
+    calculatePotentialFunction: () => number,
+    initialDistributions?: Record<ProcessId, Color[]>
   ): void {
     console.log('\n🎯 FINAL RESULTS:');
     
@@ -113,8 +133,17 @@ export class ValidationService {
     console.log(`📊 Final ball count: ${totalFinalBalls} balls (${ballsInTransit} in transit)`);
     console.log(`📊 Final color distribution: ${Array.from(finalColorCounts.entries()).map(([c, n]) => `${n} ${c}`).join(', ')}`);
     
-    if (totalFinalBalls + ballsInTransit !== 30) {
-      console.error(`❌ CRITICAL ERROR: Ball count mismatch! Expected 30 total, found ${totalFinalBalls + ballsInTransit} (${totalFinalBalls} in processes + ${ballsInTransit} in transit)`);
+    // Calculate expected total from initial distributions
+    let expectedTotal = 30; // Default for backward compatibility
+    if (initialDistributions) {
+      expectedTotal = 0;
+      for (const [processId, distribution] of Object.entries(initialDistributions)) {
+        expectedTotal += distribution.length;
+      }
+    }
+    
+    if (totalFinalBalls + ballsInTransit !== expectedTotal) {
+      console.error(`❌ CRITICAL ERROR: Ball count mismatch! Expected ${expectedTotal} total, found ${totalFinalBalls + ballsInTransit} (${totalFinalBalls} in processes + ${ballsInTransit} in transit)`);
     }
   }
 }

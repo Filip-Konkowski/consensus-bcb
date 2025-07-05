@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Color, ProcessId, ProcessState, Message, SystemState } from './types';
 import {
   ColorSelectionService,
@@ -10,7 +10,7 @@ import {
 
 /**
  * Base Consensus Service Implementation
- * Contains the core algorithm logic without framework dependencies
+ * Contains the core algorithm logic, injectable by NestJS
  */
 @Injectable()
 export class BaseConsensusService {
@@ -27,8 +27,8 @@ export class BaseConsensusService {
   protected validationService: ValidationService;
   protected systemStateService: SystemStateService;
 
-  // Initial ball distributions as specified
-  protected readonly initialDistributions: Record<ProcessId, Color[]> = {
+  // Initial ball distributions - can be customized
+  protected initialDistributions: Record<ProcessId, Color[]> = {
     1: ["R","R","R","G","G","G","B","B","B","R"],
     2: ["G","G","G","R","R","B","B","B","R","R"],
     3: ["B","B","B","B","R","G","G","G","G","R"]
@@ -52,35 +52,31 @@ export class BaseConsensusService {
   }
 
   /**
-   * Initialize the three processes with their starting ball distributions
+   * Set custom color distributions for processes
+   */
+  setCustomDistributions(distributions: Record<ProcessId, Color[]>): void {
+    this.initialDistributions = { ...distributions };
+  }
+
+  /**
+   * Initialize processes with their starting ball distributions
+   * Dynamically creates processes based on available distributions
    */
   protected initializeProcesses(): void {
-    this.processes = [
-      {
-        id: 1,
-        stack: [...this.initialDistributions[1]],
+    this.processes = [];
+    
+    // Create processes dynamically based on available distributions
+    for (const [processIdStr, distribution] of Object.entries(this.initialDistributions)) {
+      const processId = parseInt(processIdStr) as ProcessId;
+      this.processes.push({
+        id: processId,
+        stack: [...distribution],
         wanted: null,
         partner: null,
         isDone: false,
         isActive: true
-      },
-      {
-        id: 2,
-        stack: [...this.initialDistributions[2]],
-        wanted: null,
-        partner: null,
-        isDone: false,
-        isActive: true
-      },
-      {
-        id: 3,
-        stack: [...this.initialDistributions[3]],
-        wanted: null,
-        partner: null,
-        isDone: false,
-        isActive: true
-      }
-    ];
+      });
+    }
 
     this.messageQueue = [];
     this.totalExchanges = 0;
@@ -173,7 +169,7 @@ export class BaseConsensusService {
     this.onInitialProcessStates();
     this.validationService.logSystemState(this.processes, this.totalExchanges, () => this.calculatePotentialFunction());
     this.colorSelectionService.detectColorConflicts(this.processes);
-    this.validationService.validateBallConservation(this.processes, this.messageQueue);
+    this.validationService.validateBallConservation(this.processes, this.messageQueue, this.initialDistributions);
 
     // Process messages asynchronously until convergence
     while (this.isRunning && !this.systemStateService.isSystemComplete(this.processes, this.messageQueue)) {
@@ -186,7 +182,7 @@ export class BaseConsensusService {
         this.colorSelectionService.detectColorConflicts(this.processes);
         this.colorSelectionService.resolveColorConflicts(this.processes);
         this.validationService.logSystemState(this.processes, this.totalExchanges, () => this.calculatePotentialFunction());
-        this.validationService.validateBallConservation(this.processes, this.messageQueue);
+        this.validationService.validateBallConservation(this.processes, this.messageQueue, this.initialDistributions);
       }
       
       await this.systemStateService.sleep(50); // Delay for better visualization
@@ -201,11 +197,16 @@ export class BaseConsensusService {
 
     this.isRunning = false;
     this.onConsensusCompleted(iterationCount);
-    this.validationService.validateBallConservation(this.processes, this.messageQueue);
-    this.validationService.logFinalState(this.processes, this.messageQueue, this.totalExchanges, () => this.calculatePotentialFunction());
+    this.validationService.validateBallConservation(this.processes, this.messageQueue, this.initialDistributions);
+    this.validationService.logFinalState(this.processes, this.messageQueue, this.totalExchanges, () => this.calculatePotentialFunction(), this.initialDistributions);
   }
 
-  reset(): void {
+  reset(): void;
+  reset(customDistributions: Record<ProcessId, Color[]>): void;
+  reset(customDistributions?: Record<ProcessId, Color[]>): void {
+    if (customDistributions) {
+      this.setCustomDistributions(customDistributions);
+    }
     this.initializeProcesses();
     this.onSystemReset();
   }
