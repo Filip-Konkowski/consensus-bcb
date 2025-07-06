@@ -1,5 +1,5 @@
 import {Test, TestingModule} from '@nestjs/testing';
-import {BaseConsensusService} from '../src/consensus/base-consensus.service';
+import { SilentConsensusService } from './silent-consensus.service'
 import {ColorSelectionService} from '../src/consensus/services/color-selection.service';
 import {PartnerSelectionService} from '../src/consensus/services/partner-selection.service';
 import {MessageHandlingService} from '../src/consensus/services/message-handling.service';
@@ -9,12 +9,12 @@ import {ProcessId, Color} from '../src/consensus/types';
 
 describe('Custom Distributions Tests', () => {
   let module: TestingModule;
-  let consensusService: BaseConsensusService;
+  let consensusService: SilentConsensusService;
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
       providers: [
-        BaseConsensusService,
+        SilentConsensusService,
         ColorSelectionService,
         PartnerSelectionService,
         MessageHandlingService,
@@ -23,7 +23,7 @@ describe('Custom Distributions Tests', () => {
       ],
     }).compile();
 
-    consensusService = module.get<BaseConsensusService>(BaseConsensusService);
+    consensusService = module.get<SilentConsensusService>(SilentConsensusService);
   });
 
   beforeEach(() => {
@@ -34,6 +34,10 @@ describe('Custom Distributions Tests', () => {
   });
 
   afterAll(async () => {
+    // Clean up silent mode before closing
+    if (consensusService && consensusService.destroy) {
+      consensusService.destroy();
+    }
     if (module) {
       await module.close();
     }
@@ -119,6 +123,14 @@ describe('Custom Distributions Tests', () => {
       const initialState = consensusService.getSystemState();
       expect(initialState.processes).toHaveLength(3);
 
+      // Verify initial distribution
+      expect(initialState.processes[0].stack).toEqual(['R', 'R', 'R', 'G']);
+      expect(initialState.processes[1].stack).toEqual(['G']);
+      expect(initialState.processes[2].stack).toEqual(['R', 'G']);
+
+
+      expect(initialState.processes).toHaveLength(3);
+
       const startTime = Date.now();
       await consensusService.startConsensus();
       const endTime = Date.now();
@@ -127,6 +139,11 @@ describe('Custom Distributions Tests', () => {
 
       // Verify consensus reached
       expect(finalState.isComplete).toBe(true);
+
+      // Verify initial distribution
+      expect(finalState.processes[0].stack).toEqual(['R', 'R', 'R', 'R']);
+      expect(finalState.processes[1].stack).toEqual(['G']);
+      expect(finalState.processes[2].stack).toEqual(['G', 'G']);
 
       // Verify all processes are done and in optimal state
       for (const process of finalState.processes) {
