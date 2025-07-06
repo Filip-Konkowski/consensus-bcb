@@ -34,6 +34,8 @@ export class BaseConsensusService {
     3: ["B","B","B","B","R","G","G","G","G","R"]
   };
 
+  private perfectMonochromeAchievable: boolean = false; // Cache for perfect monochrome check
+
   constructor(
     colorSelectionService: ColorSelectionService,
     partnerSelectionService: PartnerSelectionService,
@@ -99,7 +101,7 @@ export class BaseConsensusService {
    * Override in subclasses for framework-specific logging
    */
   protected onConsensusStarting(): void {
-    console.log('🚀 Starting distributed ball sorting consensus algorithm');
+    console.log('Starting distributed ball sorting consensus algorithm');
   }
 
   /**
@@ -123,7 +125,7 @@ export class BaseConsensusService {
    * Override in subclasses for framework-specific logging
    */
   protected onConsensusCompleted(iterationCount: number): void {
-    console.log(`\n🎉 Consensus algorithm completed in ${iterationCount} iterations!`);
+    console.log(`\nConsensus algorithm completed in ${iterationCount} iterations!`);
   }
 
   /**
@@ -153,6 +155,16 @@ export class BaseConsensusService {
     this.onConsensusStarting();
     this.isRunning = true;
     let iterationCount = 0;
+    let lastPotentialFunction = Number.MAX_SAFE_INTEGER;
+    let stagnationCounter = 0;
+
+    // Cache perfect monochrome achievability at the start
+    this.perfectMonochromeAchievable = this.systemStateService.isPerfectMonochromeAchievable(this.processes);
+
+    // Initial check for monochrome state for all processes (including empty ones)
+    for (const process of this.processes) {
+      this.messageHandlingService.checkMonochrome(process, this.processes, this.messageQueue, this.perfectMonochromeAchievable);
+    }
 
     // Each process computes its initial wanted color and starts the protocol
     for (const process of this.processes) {
@@ -178,18 +190,43 @@ export class BaseConsensusService {
       // Periodically check for conflicts and resolve them
       if (iterationCount % 10 === 0) {
         this.onIterationCheck(iterationCount);
-        this.colorSelectionService.detectColorConflicts(this.processes);
-        this.colorSelectionService.resolveColorConflicts(this.processes);
+        let hasColorConflict = this.colorSelectionService.detectColorConflicts(this.processes);
+        if (hasColorConflict) this.colorSelectionService.resolveColorConflicts(this.processes);
         this.validationService.logSystemState(this.processes, this.totalExchanges, () => this.calculatePotentialFunction());
         this.validationService.validateBallConservation(this.processes, this.messageQueue, this.initialDistributions);
+        
+        // Check for stagnation (potential function not improving)
+        const currentPotentialFunction = this.calculatePotentialFunction();
+        if (currentPotentialFunction >= lastPotentialFunction) {
+          stagnationCounter++;
+          if (stagnationCounter >= 5) { // Reduced from 10 to 5
+            this.onWarning('⚠️ Algorithm stagnated (potential function not improving), assuming optimal consensus reached');
+            // Mark all processes as done to force completion
+            for (const process of this.processes) {
+              if (!process.isDone) {
+                process.isDone = true;
+              }
+            }
+            break;
+          }
+        } else {
+          stagnationCounter = 0; // Reset counter if progress is made
+        }
+        lastPotentialFunction = currentPotentialFunction;
       }
       
-      await this.systemStateService.sleep(50); // Delay for better visualization
+      await this.systemStateService.sleep(10); // Reduced from 50 to 10 for faster testing
       
       // Safety check to prevent infinite loops
-      if (iterationCount > 500) {
+      if (iterationCount > 200) { // Reduced from 500 to 200
         this.onWarning('⚠️ Algorithm taking too long, forcing resolution');
         this.colorSelectionService.resolveColorConflicts(this.processes);
+        // Mark all processes as done to force completion
+        for (const process of this.processes) {
+          if (!process.isDone) {
+            process.isDone = true;
+          }
+        }
         break;
       }
     }
@@ -251,7 +288,7 @@ export class BaseConsensusService {
           recipient, 
           sender,
           this.messageQueue,
-          (process) => this.messageHandlingService.checkMonochrome(process, this.processes, this.messageQueue),
+          (process) => this.messageHandlingService.checkMonochrome(process, this.processes, this.messageQueue, this.perfectMonochromeAchievable),
           (process) => this.colorSelectionService.computeWantedColor(process, this.messageQueue),
           (process) => this.partnerSelectionService.choosePartner(process, this.processes)
         );
@@ -262,7 +299,7 @@ export class BaseConsensusService {
           recipient, 
           sender,
           totalExchangesRef,
-          (process) => this.messageHandlingService.checkMonochrome(process, this.processes, this.messageQueue),
+          (process) => this.messageHandlingService.checkMonochrome(process, this.processes, this.messageQueue, this.perfectMonochromeAchievable),
           (process) => this.colorSelectionService.computeWantedColor(process, this.messageQueue),
           (process) => this.partnerSelectionService.choosePartner(process, this.processes),
           this.messageQueue

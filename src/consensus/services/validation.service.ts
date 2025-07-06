@@ -80,7 +80,7 @@ export class ValidationService {
   logSystemState(processes: ProcessState[], totalExchanges: number, calculatePotentialFunction: () => number): void {
     console.log('Current System State:');
     for (const process of processes) {
-      const status = process.isDone ? '✅ DONE' : '🟡 ACTIVE';
+      const status = process.isDone ? '✅ DONE' : 'ACTIVE';
       const stack = process.stack.join(',');
       const wanted = process.wanted || 'none';
       const partner = process.partner || 'none';
@@ -100,7 +100,7 @@ export class ValidationService {
     calculatePotentialFunction: () => number,
     initialDistributions?: Record<ProcessId, Color[]>
   ): void {
-    console.log('\n🎯 FINAL RESULTS:');
+    console.log('\nFINAL RESULTS:');
     
     let totalFinalBalls = 0;
     const finalColorCounts = new Map<Color, number>();
@@ -128,10 +128,10 @@ export class ValidationService {
       }
     }
     
-    console.log(`\n📊 Algorithm completed with ${totalExchanges} total ball exchanges`);
-    console.log(`📉 Final potential function Φ: ${calculatePotentialFunction()}`);
-    console.log(`📊 Final ball count: ${totalFinalBalls} balls (${ballsInTransit} in transit)`);
-    console.log(`📊 Final color distribution: ${Array.from(finalColorCounts.entries()).map(([c, n]) => `${n} ${c}`).join(', ')}`);
+    console.log(`\nAlgorithm completed with ${totalExchanges} total ball exchanges`);
+    console.log(`Final potential function Φ: ${calculatePotentialFunction()}`);
+    console.log(`Final ball count: ${totalFinalBalls} balls (${ballsInTransit} in transit)`);
+    console.log(`Final color distribution: ${Array.from(finalColorCounts.entries()).map(([c, n]) => `${n} ${c}`).join(', ')}`);
     
     // Calculate expected total from initial distributions
     let expectedTotal = 30; // Default for backward compatibility

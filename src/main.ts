@@ -34,9 +34,9 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port);
   
-  console.log(`🚀 NestJS Application is running on: http://localhost:${port}`);
-  console.log(`📚 API Documentation available at: http://localhost:${port}/api/docs`);
-  console.log(`🎯 Consensus Algorithm UI available at: http://localhost:${port}`);
+  console.log(`NestJS Application is running on: http://localhost:${port}`);
+  console.log(`API Documentation available at: http://localhost:${port}/api/docs`);
+  console.log(`Consensus Algorithm UI available at: http://localhost:${port}`);
 }
 
 bootstrap();

@@ -47,7 +47,7 @@ export class PartnerSelectionService {
       process.partner = bestPartner.id;
     }
 
-    console.log(`🤝 Process ${process.id} chose partner ${process.partner} (score: ${bestScore})`);
+    console.log(`Process ${process.id} chose partner ${process.partner} (score: ${bestScore})`);
   }
 
   /**

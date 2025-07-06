@@ -1,5 +1,6 @@
 import {Test, TestingModule} from '@nestjs/testing';
 import {BaseConsensusService} from '../src/consensus/base-consensus.service';
+import {SilentConsensusService} from './silent-consensus.service';
 import {ColorSelectionService} from '../src/consensus/services/color-selection.service';
 import {PartnerSelectionService} from '../src/consensus/services/partner-selection.service';
 import {MessageHandlingService} from '../src/consensus/services/message-handling.service';
@@ -14,7 +15,10 @@ describe('Custom Distributions Tests', () => {
   beforeAll(async () => {
     module = await Test.createTestingModule({
       providers: [
-        BaseConsensusService,
+        {
+          provide: BaseConsensusService,
+          useClass: SilentConsensusService,
+        },
         ColorSelectionService,
         PartnerSelectionService,
         MessageHandlingService,

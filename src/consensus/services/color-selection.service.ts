@@ -106,7 +106,7 @@ export class ColorSelectionService {
     }
 
     process.wanted = selectedColor;
-    console.log(`🎯 Process ${process.id} wants color ${selectedColor} (has ${colorCounts.get(selectedColor)} balls)`);
+    console.log(`Process ${process.id} wants color ${selectedColor} (has ${colorCounts.get(selectedColor)} balls)`);
   }
 
   /**
@@ -131,7 +131,7 @@ export class ColorSelectionService {
         hasConflicts = true;
         
         // Suggest resolution strategy
-        console.log(`💡 Resolution: Process ${processIds[0]} should keep ${color}, others should reconsider`);
+        console.log(`Resolution: Process ${processIds[0]} should keep ${color}, others should reconsider`);
       }
     }
     
@@ -162,7 +162,7 @@ export class ColorSelectionService {
     // Resolve conflicts
     for (const [color, conflictedProcesses] of Array.from(colorWants.entries())) {
       if (conflictedProcesses.length > 1) {
-        console.log(`🔧 Resolving conflict for color ${color} between processes [${conflictedProcesses.map(p => p.id).join(', ')}]`);
+        console.log(`Resolving conflict for color ${color} between processes [${conflictedProcesses.map(p => p.id).join(', ')}]`);
         
         // Sort by priority (who should get this color)
         conflictedProcesses.sort((a, b) => {
@@ -173,11 +173,11 @@ export class ColorSelectionService {
         
         // Winner keeps the color, others must choose alternatives
         const winner = conflictedProcesses[0];
-        console.log(`👑 Process ${winner.id} wins color ${color} (priority ${this.getColorPriorityForProcess(winner.id, color)})`);
+        console.log(`Process ${winner.id} wins color ${color} (priority ${this.getColorPriorityForProcess(winner.id, color)})`);
         
         for (let i = 1; i < conflictedProcesses.length; i++) {
           const loser = conflictedProcesses[i];
-          console.log(`🔄 Process ${loser.id} must choose alternative to ${color}`);
+          console.log(`Process ${loser.id} must choose alternative to ${color}`);
           this.forceAlternativeColor(loser, color);
         }
       }
@@ -201,7 +201,7 @@ export class ColorSelectionService {
     if (alternatives.length > 0) {
       const newWanted = alternatives[0][0];
       process.wanted = newWanted;
-      console.log(`🎯 Process ${process.id} now wants ${newWanted} instead of ${conflictColor} (has ${alternatives[0][1]} balls)`);
+      console.log(`Process ${process.id} now wants ${newWanted} instead of ${conflictColor} (has ${alternatives[0][1]} balls)`);
     }
   }
 }

@@ -39,7 +39,7 @@ export class MessageHandlingService {
     if (!message.color) return;
 
     const requestedColor = message.color;
-    console.log(`📨 Process ${recipient.id} received request for ${requestedColor} from Process ${sender.id}`);
+    console.log(`Process ${recipient.id} received request for ${requestedColor} from Process ${sender.id}`);
     console.log(`   Process ${recipient.id} wants: ${recipient.wanted}, has: [${recipient.stack.join(',')}]`);
     
     // Find a ball of the requested color that we don't want
@@ -96,7 +96,7 @@ export class MessageHandlingService {
     recipient.stack.push(message.color);
     totalExchanges.count++;
 
-    console.log(`📦 Process ${recipient.id} received ${message.color} from Process ${sender.id} (now has ${recipient.stack.length} balls)`);
+    console.log(`Process ${recipient.id} received ${message.color} from Process ${sender.id} (now has ${recipient.stack.length} balls)`);
 
     onMonochromeCheck(recipient);
 
@@ -120,25 +120,91 @@ export class MessageHandlingService {
   }
 
   /**
-   * Check if a process has achieved monochrome state
+   * Check if a process has achieved monochrome state or optimal state
    */
-  checkMonochrome(process: ProcessState, allProcesses: ProcessState[], messageQueue: Message[]): void {
-    if (process.stack.length === 0) return;
+  checkMonochrome(process: ProcessState, allProcesses: ProcessState[], messageQueue: Message[], perfectMonochromeAchievable: boolean): void {
+    // Empty processes are considered optimal (no work needed)
+    if (process.stack.length === 0) {
+      if (!process.isDone) {
+        process.isDone = true;
+        this.sendDoneMessages(process, allProcesses, messageQueue);
+      }
+      return;
+    }
 
     const uniqueColors = new Set(process.stack);
+    
+    // Perfect monochrome state
     if (uniqueColors.size === 1) {
-      process.isDone = true;
+      if (!process.isDone) {
+        process.isDone = true;
+        this.sendDoneMessages(process, allProcesses, messageQueue);
+      }
+      return;
+    }
 
-      for (const otherProcess of allProcesses) {
-        if (otherProcess.id !== process.id && !otherProcess.isDone) {
-          const doneMessage: Message = {
-            type: 'DONE',
-            from: process.id,
-            to: otherProcess.id,
-            timestamp: Date.now()
-          };
-          messageQueue.push(doneMessage);
-        }
+    // Check for optimal state when perfect monochrome isn't achievable
+    if (this.isProcessInOptimalState(process, allProcesses, perfectMonochromeAchievable)) {
+      if (!process.isDone) {
+        process.isDone = true;
+        this.sendDoneMessages(process, allProcesses, messageQueue);
+      }
+    }
+  }
+
+  /**
+   * Check if a process is in its optimal state given the color distribution constraints
+   */
+  private isProcessInOptimalState(process: ProcessState, allProcesses: ProcessState[], perfectMonochromeAchievable: boolean): boolean {
+    if (process.stack.length === 0) return true;
+
+    if (perfectMonochromeAchievable) {
+      // If perfect monochrome is achievable, only accept perfect monochrome
+      return new Set(process.stack).size === 1;
+    }
+
+    // If perfect monochrome is not achievable, check for optimal distribution
+    // Calculate total color counts across all processes
+    const totalColorCounts = new Map<Color, number>();
+    for (const p of allProcesses) {
+      for (const color of p.stack) {
+        totalColorCounts.set(color, (totalColorCounts.get(color) || 0) + 1);
+      }
+    }
+
+    // Calculate this process's color counts
+    const processColorCounts = new Map<Color, number>();
+    for (const color of process.stack) {
+      processColorCounts.set(color, (processColorCounts.get(color) || 0) + 1);
+    }
+
+    // Find the dominant color in this process
+    const dominantEntry = Array.from(processColorCounts.entries())
+      .reduce((max, current) => current[1] > max[1] ? current : max);
+    
+    const dominantColor = dominantEntry[0];
+    const dominantCount = dominantEntry[1];
+
+    // For unequal distributions, a process is optimal if it has achieved 
+    // good concentration of its dominant color (≥ 60% threshold for mixed scenarios)
+    const dominantPercentage = dominantCount / process.stack.length;
+    
+    return dominantPercentage >= 0.60;
+  }
+
+  /**
+   * Send DONE messages to other active processes
+   */
+  private sendDoneMessages(process: ProcessState, allProcesses: ProcessState[], messageQueue: Message[]): void {
+    for (const otherProcess of allProcesses) {
+      if (otherProcess.id !== process.id && !otherProcess.isDone) {
+        const doneMessage: Message = {
+          type: 'DONE',
+          from: process.id,
+          to: otherProcess.id,
+          timestamp: Date.now()
+        };
+        messageQueue.push(doneMessage);
       }
     }
   }

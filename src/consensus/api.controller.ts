@@ -41,11 +41,11 @@ export class ApiController {
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async startConsensus(): Promise<{ message: string; started: boolean }> {
     try {
-      this.logger.log('🚀 Starting consensus algorithm via REST API');
+      this.logger.log('Starting consensus algorithm via REST API');
       
       // Simulate algorithm running
       setTimeout(() => {
-        this.logger.log('🎉 Consensus algorithm completed (simulated)');
+        this.logger.log('Consensus algorithm completed (simulated)');
         this.mockState.isComplete = true;
         this.mockState.potentialFunction = 0;
         // Simulate final state - each process has balls of one color
@@ -77,7 +77,7 @@ export class ApiController {
   @ApiOperation({ summary: 'Reset the system to initial state' })
   @ApiResponse({ status: 200, description: 'System reset successfully' })
   reset(): { message: string; reset: boolean } {
-    this.logger.log('🔄 Resetting system via REST API');
+    this.logger.log('Resetting system via REST API');
     
     // Reset mock state
     this.mockState = {
