@@ -7,7 +7,6 @@ export interface ProcessState {
   wanted: Color | null;
   partner: ProcessId | null;
   isDone: boolean;
-  isActive: boolean;
 }
 
 export interface Message {

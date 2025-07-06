@@ -116,7 +116,6 @@ export class MessageHandlingService {
     const sender = allProcesses.find(p => p.id === message.from);
     if (sender) {
       sender.isDone = true;
-      sender.isActive = false;
     }
   }
 
@@ -129,7 +128,6 @@ export class MessageHandlingService {
     const uniqueColors = new Set(process.stack);
     if (uniqueColors.size === 1) {
       process.isDone = true;
-      process.isActive = false;
 
       for (const otherProcess of allProcesses) {
         if (otherProcess.id !== process.id && !otherProcess.isDone) {
@@ -155,7 +153,7 @@ export class MessageHandlingService {
     onChoosePartner: (process: ProcessState) => void
   ): void {
     for (const process of allProcesses) {
-      if (!process.isDone && process.isActive) {
+      if (!process.isDone) {
         // Only trigger new requests if no pending messages from this process
         const hasPendingMessages = messageQueue.some(m => m.from === process.id && m.type === 'REQUEST');
         if (!hasPendingMessages) {

@@ -437,10 +437,10 @@
             
             state.processes.forEach(process => {
                 const processDiv = document.createElement('div');
-                processDiv.className = `process ${process.isDone ? 'done' : (process.isActive ? 'active' : 'idle')}`;
+                processDiv.className = `process ${process.isDone ? 'done' : 'active'}`;
                 
-                const statusClass = process.isDone ? 'done' : (process.isActive ? 'active' : 'idle');
-                const statusText = process.isDone ? 'Complete' : (process.isActive ? 'Active' : 'Idle');
+                const statusClass = process.isDone ? 'done' : 'active';
+                const statusText = process.isDone ? 'Complete' : 'Active';
                 
                 processDiv.innerHTML = `
                     <div class="process-header">

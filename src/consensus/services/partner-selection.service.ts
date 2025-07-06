@@ -15,7 +15,7 @@ export class PartnerSelectionService {
    */
   choosePartner(process: ProcessState, allProcesses: ProcessState[]): void {
     const otherProcesses = allProcesses.filter(p => 
-      p.id !== process.id && !p.isDone && p.isActive
+      p.id !== process.id && !p.isDone
     );
 
     if (otherProcesses.length === 0) {
@@ -65,24 +65,14 @@ export class PartnerSelectionService {
     
     // Negative score: candidate wants the same color we want (conflict)
     if (candidate.wanted === process.wanted) {
-      score -= 10; // Strong penalty for conflict
+      score -= 20; // Strong penalty for conflict
     }
     
     // Positive score: we have balls of the color the candidate wants
     if (candidate.wanted) {
-      const ourColorCount = process.stack.filter(c => c === candidate.wanted).length;
+      // const ourColorCount = process.stack.filter(c => c === candidate.wanted).length;
       const unwantedByUs = process.stack.filter(c => c === candidate.wanted && c !== process.wanted).length;
       score += unwantedByUs * 2; // We can help them, good mutual exchange
-    }
-    
-    // Preference for processes with different color priorities
-    const ourPriority = this.colorSelectionService.getColorPriorityForProcess(process.id, process.wanted);
-    const theirPriority = candidate.wanted ? 
-      this.colorSelectionService.getColorPriorityForProcess(candidate.id, candidate.wanted) : 0;
-    
-    // Bonus for complementary priorities (different preferred colors)
-    if (candidate.wanted && candidate.wanted !== process.wanted) {
-      score += 5;
     }
     
     return score;

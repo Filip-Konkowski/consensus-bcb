@@ -164,7 +164,6 @@ describe('Custom Distributions Tests', () => {
       // Verify all processes are monochrome
       for (const process of finalState.processes) {
         expect(process.isDone).toBe(true);
-        expect(process.isActive).toBe(false);
         
         if (process.stack.length > 0) {
           const uniqueColors = new Set(process.stack);

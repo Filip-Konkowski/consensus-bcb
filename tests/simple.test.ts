@@ -87,7 +87,6 @@ describe('Simple Tests', () => {
       const state = consensusService.getSystemState();
       
       for (const process of state.processes) {
-        expect(process.isActive).toBe(true);
         expect(process.isDone).toBe(false);
       }
     });
@@ -182,7 +181,6 @@ describe('Simple Tests', () => {
       // Verify all processes are monochrome
       for (const process of state.processes) {
         expect(process.isDone).toBe(true);
-        expect(process.isActive).toBe(false);
         
         if (process.stack.length > 0) {
           const uniqueColors = new Set(process.stack);

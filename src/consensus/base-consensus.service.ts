@@ -73,8 +73,7 @@ export class BaseConsensusService {
         stack: [...distribution],
         wanted: null,
         partner: null,
-        isDone: false,
-        isActive: true
+        isDone: false
       });
     }
 

@@ -21,9 +21,9 @@ export class ApiController {
   // Simple mock state for now (until we fix the complex ConsensusService)
   private mockState = {
     processes: [
-      { id: 1, stack: ['R','R','R','G','G','G','B','B','B','R'], wanted: 'R', partner: null, isDone: false, isActive: true },
-      { id: 2, stack: ['G','G','G','R','R','B','B','B','R','R'], wanted: 'G', partner: null, isDone: false, isActive: true },
-      { id: 3, stack: ['B','B','B','B','R','G','G','G','G','R'], wanted: 'B', partner: null, isDone: false, isActive: true }
+      { id: 1, stack: ['R','R','R','G','G','G','B','B','B','R'], wanted: 'R', partner: null, isDone: false },
+      { id: 2, stack: ['G','G','G','R','R','B','B','B','R','R'], wanted: 'G', partner: null, isDone: false },
+      { id: 3, stack: ['B','B','B','B','R','G','G','G','G','R'], wanted: 'B', partner: null, isDone: false }
     ],
     messageQueue: [],
     totalExchanges: 0,
@@ -50,9 +50,9 @@ export class ApiController {
         this.mockState.potentialFunction = 0;
         // Simulate final state - each process has balls of one color
         this.mockState.processes = [
-          { id: 1, stack: ['R','R','R','R','R','R','R','R','R','R'], wanted: 'R', partner: null, isDone: true, isActive: false },
-          { id: 2, stack: ['G','G','G','G','G','G','G','G','G','G'], wanted: 'G', partner: null, isDone: true, isActive: false },
-          { id: 3, stack: ['B','B','B','B','B','B','B','B','B','B'], wanted: 'B', partner: null, isDone: true, isActive: false }
+          { id: 1, stack: ['R','R','R','R','R','R','R','R','R','R'], wanted: 'R', partner: null, isDone: true },
+          { id: 2, stack: ['G','G','G','G','G','G','G','G','G','G'], wanted: 'G', partner: null, isDone: true },
+          { id: 3, stack: ['B','B','B','B','B','B','B','B','B','B'], wanted: 'B', partner: null, isDone: true }
         ];
       }, 2000);
       
@@ -82,9 +82,9 @@ export class ApiController {
     // Reset mock state
     this.mockState = {
       processes: [
-        { id: 1, stack: ['R','R','R','G','G','G','B','B','B','R'], wanted: 'R', partner: null, isDone: false, isActive: true },
-        { id: 2, stack: ['G','G','G','R','R','B','B','B','R','R'], wanted: 'G', partner: null, isDone: false, isActive: true },
-        { id: 3, stack: ['B','B','B','B','R','G','G','G','G','R'], wanted: 'B', partner: null, isDone: false, isActive: true }
+        { id: 1, stack: ['R','R','R','G','G','G','B','B','B','R'], wanted: 'R', partner: null, isDone: false },
+        { id: 2, stack: ['G','G','G','R','R','B','B','B','R','R'], wanted: 'G', partner: null, isDone: false },
+        { id: 3, stack: ['B','B','B','B','R','G','G','G','G','R'], wanted: 'B', partner: null, isDone: false }
       ],
       messageQueue: [],
       totalExchanges: 0,

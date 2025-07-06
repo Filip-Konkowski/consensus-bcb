@@ -80,7 +80,7 @@ export class ValidationService {
   logSystemState(processes: ProcessState[], totalExchanges: number, calculatePotentialFunction: () => number): void {
     console.log('Current System State:');
     for (const process of processes) {
-      const status = process.isDone ? '✅ DONE' : (process.isActive ? '🟡 ACTIVE' : '⭕ INACTIVE');
+      const status = process.isDone ? '✅ DONE' : '🟡 ACTIVE';
       const stack = process.stack.join(',');
       const wanted = process.wanted || 'none';
       const partner = process.partner || 'none';
