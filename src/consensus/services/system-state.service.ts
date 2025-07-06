@@ -87,10 +87,50 @@ export class SystemStateService {
     const dominantCount = processColorCounts.get(dominantColor) || 0;
     const totalOfDominantColor = totalColorCounts.get(dominantColor) || 0;
     
-    // If this process already has all available balls of its dominant color, it can't improve
-    const maxPossibleDominantBalls = Math.min(totalOfDominantColor, process.stack.length);
+    // Enhanced logic: Check if this process can improve by considering the global optimal distribution
+    // For unequal color counts, we need to find the best possible distribution
+    const optimalDistribution = this.calculateOptimalDistribution(totalColorCounts, process.stack.length);
     
-    return dominantCount < maxPossibleDominantBalls;
+    // Check if this process is already at or near its optimal state
+    const dominantPercentage = dominantCount / process.stack.length;
+    const optimalPercentage = optimalDistribution.maxPossibleDominantPercentage;
+    
+    // Allow some tolerance for floating point comparison
+    const tolerance = 0.01;
+    return dominantPercentage < (optimalPercentage - tolerance);
+  }
+
+  /**
+   * Calculate the optimal distribution for a process given the total color counts
+   */
+  private calculateOptimalDistribution(totalColorCounts: Map<Color, number>, processSize: number): {
+    maxPossibleDominantPercentage: number;
+    optimalColor: Color;
+  } {
+    // For unequal distributions, the optimal strategy is to give each process 
+    // as many balls as possible of a single color, starting with the most abundant colors
+    
+    const sortedColors = Array.from(totalColorCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .filter(([_, count]) => count > 0);
+    
+    let maxPossibleDominantPercentage = 0;
+    let optimalColor: Color = sortedColors[0][0]; // default to most abundant color
+    
+    for (const [color, availableCount] of sortedColors) {
+      const maxBallsOfThisColor = Math.min(availableCount, processSize);
+      const dominantPercentage = maxBallsOfThisColor / processSize;
+      
+      if (dominantPercentage > maxPossibleDominantPercentage) {
+        maxPossibleDominantPercentage = dominantPercentage;
+        optimalColor = color;
+      }
+    }
+    
+    return {
+      maxPossibleDominantPercentage,
+      optimalColor
+    };
   }
 
   /**
@@ -155,30 +195,22 @@ export class SystemStateService {
     const totalColorCounts = this.getTotalColorCounts(processes);
     const processCount = processes.length;
     
-    console.log(`Checking perfect monochrome achievability:`, {
-      totalColorCounts: Array.from(totalColorCounts.entries()),
-      processCount
-    });
-    
     // For perfect monochrome, each process must have balls of only one color
     const nonZeroColors = Array.from(totalColorCounts.entries()).filter(([_, count]) => count > 0);
     
     if (nonZeroColors.length < processCount) {
-      console.log(`❌ Not enough colors: ${nonZeroColors.length} colors < ${processCount} processes`);
       return false;
     }
     
-    // Calculate total balls per process
+    // Calculate total balls
     const totalBalls = Array.from(totalColorCounts.values()).reduce((sum, count) => sum + count, 0);
-    
+
     // Simple check: if balls per process is not an integer, perfect monochrome is impossible
     if (totalBalls % processCount !== 0) {
-      console.log(`❌ Balls per process not integer: ${totalBalls} balls ÷ ${processCount} processes`);
       return false;
     }
     
     const ballsPerProcess = totalBalls / processCount;
-    console.log(`Balls per process: ${ballsPerProcess}`);
     
     // Check if we can assign exactly one color to each process such that
     // each process gets exactly ballsPerProcess balls
@@ -188,39 +220,26 @@ export class SystemStateService {
     
     // Sort colors by count (descending)
     const sortedColors = Array.from(totalColorCounts.entries()).sort((a, b) => b[1] - a[1]);
-    console.log(`Sorted colors:`, sortedColors);
     
-    // Use a greedy approach: try to assign the largest color counts to processes
+    // Try to assign colors to processes using a greedy approach
     const remainingCounts = new Map(sortedColors);
-    const assignments: number[] = [];
+    let assignedProcesses = 0;
     
-    for (let i = 0; i < processCount; i++) {
-      // Find the best color that can provide exactly ballsPerProcess balls
-      let assigned = false;
+    for (const [color, count] of sortedColors) {
+      const maxProcessesForThisColor = Math.floor(count / ballsPerProcess);
+      const processesToAssign = Math.min(maxProcessesForThisColor, processCount - assignedProcesses);
       
-      for (const [color, count] of remainingCounts.entries()) {
-        if (count >= ballsPerProcess) {
-          assignments.push(ballsPerProcess);
-          remainingCounts.set(color, count - ballsPerProcess);
-          if (remainingCounts.get(color) === 0) {
-            remainingCounts.delete(color);
-          }
-          console.log(`✅ Assigned ${ballsPerProcess} ${color} balls to process ${i + 1}`);
-          assigned = true;
-          break;
-        }
+      if (processesToAssign > 0) {
+        assignedProcesses += processesToAssign;
+        remainingCounts.set(color, count - (processesToAssign * ballsPerProcess));
       }
       
-      if (!assigned) {
-        console.log(`❌ Could not assign ${ballsPerProcess} balls to process ${i + 1}`);
-        return false;
+      if (assignedProcesses >= processCount) {
+        break;
       }
     }
     
-    // Check if all balls are assigned
-    const totalAssigned = assignments.reduce((sum, count) => sum + count, 0);
-    const result = totalAssigned === totalBalls;
-    console.log(`Perfect monochrome achievable: ${result} (${totalAssigned} assigned of ${totalBalls} total)`);
+    const result = assignedProcesses >= processCount;
     return result;
   }
 }
