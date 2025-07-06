@@ -6,38 +6,6 @@ import { Color, ProcessId, ProcessState, Message } from '../types';
  */
 @Injectable()
 export class ColorSelectionService {
-  
-  /**
-   * Determines if a process should claim a specific color
-   * Uses local heuristics to avoid conflicts without global knowledge
-   */
-  shouldProcessClaimColor(process: ProcessState, color: Color, count: number): boolean {
-    // If this process has the majority of this color in its stack, it's a strong candidate
-    const totalBalls = process.stack.length;
-    const colorPercentage = count / totalBalls;
-    
-    // Strong claim: if this process has >50% of this color in its stack
-    if (colorPercentage > 0.5) {
-      return true;
-    }
-    
-    // Medium claim: if this process has >=40% and has the "right" to this color
-    // Use deterministic process ID-based assignment to avoid conflicts
-    if (colorPercentage >= 0.4) {
-      const colorPriority = this.getColorPriorityForProcess(process.id, color);
-      return colorPriority === 1; // Highest priority for this color
-    }
-    
-    // Weak claim: only if no other strong preference and this is the best option
-    if (colorPercentage >= 0.3) {
-      const colorPriority = this.getColorPriorityForProcess(process.id, color);
-      // Check if other processes likely have stronger claims
-      const otherProcessesLikelyStronger = this.estimateOtherProcessClaims(process, color, []);
-      return colorPriority === 1 && !otherProcessesLikelyStronger;
-    }
-    
-    return false;
-  }
 
   /**
    * Deterministic color priority assignment based on process ID
@@ -78,7 +46,20 @@ export class ColorSelectionService {
    * Compute the wanted color for a process using advanced strategy
    */
   computeWantedColor(process: ProcessState, messageQueue: Message[] = []): void {
-    if (process.stack.length === 0) return;
+    // For empty processes, we need to determine what color they should want
+    // based on what colors are available from other processes
+    if (process.stack.length === 0) {
+      // Empty processes should want a color that other processes have in excess
+      // Use process ID as deterministic tiebreaker
+      const priorityColors = this.getColorPriorityForProcess(process.id, 'R') === 1 ? ['R', 'G', 'B'] :
+                           this.getColorPriorityForProcess(process.id, 'G') === 1 ? ['G', 'B', 'R'] :
+                           ['B', 'R', 'G'];
+      
+      // Choose the first color in priority order as the wanted color
+      process.wanted = priorityColors[0] as Color;
+      console.log(`Process ${process.id} wants color ${process.wanted} (empty process)`);
+      return;
+    }
 
     const colorCounts = new Map<Color, number>();
     for (const color of process.stack) {
@@ -92,18 +73,6 @@ export class ColorSelectionService {
     // Strategy: Use process ID as tiebreaker to avoid conflicts
     // This ensures deterministic color assignment without global coordination
     let selectedColor: Color = process.stack[0]; // fallback
-    
-    for (const [color, count] of sortedColors) {
-      // Check if this process should claim this color based on:
-      // 1. It has the most of this color among active processes (locally estimated)
-      // 2. Use process ID as deterministic tiebreaker
-      const shouldClaimColor = this.shouldProcessClaimColor(process, color, count);
-      
-      if (shouldClaimColor) {
-        selectedColor = color;
-        break;
-      }
-    }
 
     process.wanted = selectedColor;
     console.log(`Process ${process.id} wants color ${selectedColor} (has ${colorCounts.get(selectedColor)} balls)`);

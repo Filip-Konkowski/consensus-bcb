@@ -228,6 +228,11 @@ export class BaseConsensusService {
       }
     }
 
+    // Final check for all processes to ensure proper completion state
+    for (const process of this.processes) {
+      this.messageHandlingService.checkMonochrome(process, this.processes, this.messageQueue, this.perfectMonochromeAchievable);
+    }
+
     this.isRunning = false;
     this.onConsensusCompleted(iterationCount);
     this.validationService.logFinalState(this.processes, this.messageQueue, this.totalExchanges, () => this.calculatePotentialFunction(), this.initialDistributions);

@@ -122,11 +122,24 @@ export class MessageHandlingService {
    * Check if a process has achieved monochrome state or optimal state
    */
   checkMonochrome(process: ProcessState, allProcesses: ProcessState[], messageQueue: Message[], perfectMonochromeAchievable: boolean): void {
-    // Empty processes are considered optimal (no work needed)
+    // Empty processes should only be marked as done if no other process can give them balls
     if (process.stack.length === 0) {
-      if (!process.isDone) {
-        process.isDone = true;
-        this.sendDoneMessages(process, allProcesses, messageQueue);
+      // Check if any other process has balls they could potentially give to this empty process
+      const canReceiveBalls = allProcesses.some(p => {
+        if (p.id === process.id) return false;
+        if (p.isDone) return false;
+        if (p.stack.length === 0) return false;
+        
+        // Check if this other process has multiple colors (i.e., can give away unwanted balls)
+        const uniqueColors = new Set(p.stack);
+        return uniqueColors.size > 1;
+      });
+      
+      if (!canReceiveBalls) {
+        if (!process.isDone) {
+          process.isDone = true;
+          this.sendDoneMessages(process, allProcesses, messageQueue);
+        }
       }
       return;
     }
