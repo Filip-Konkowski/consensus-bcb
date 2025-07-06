@@ -3,7 +3,7 @@ import {BaseConsensusService} from '../src/consensus/base-consensus.service';
 import {ColorSelectionService} from '../src/consensus/services/color-selection.service';
 import {PartnerSelectionService} from '../src/consensus/services/partner-selection.service';
 import {MessageHandlingService} from '../src/consensus/services/message-handling.service';
-import {ValidationService} from '../src/consensus/services/validation.service';
+import {LoggingSystemService} from '../src/consensus/services/logging-system.service';
 import {SystemStateService} from '../src/consensus/services/system-state.service';
 import {ProcessId, Color} from '../src/consensus/types';
 
@@ -18,7 +18,7 @@ describe('Custom Distributions Tests', () => {
         ColorSelectionService,
         PartnerSelectionService,
         MessageHandlingService,
-        ValidationService,
+        LoggingSystemService,
         SystemStateService,
       ],
     }).compile();

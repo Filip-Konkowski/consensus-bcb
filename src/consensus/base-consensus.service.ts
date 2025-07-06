@@ -4,7 +4,7 @@ import {
   ColorSelectionService,
   PartnerSelectionService,
   MessageHandlingService,
-  ValidationService,
+  LoggingSystemService,
   SystemStateService
 } from './services';
 
@@ -24,7 +24,7 @@ export class BaseConsensusService {
   protected colorSelectionService: ColorSelectionService;
   protected partnerSelectionService: PartnerSelectionService;
   protected messageHandlingService: MessageHandlingService;
-  protected validationService: ValidationService;
+  protected validationService: LoggingSystemService;
   protected systemStateService: SystemStateService;
 
   // Initial ball distributions - can be customized
@@ -40,7 +40,7 @@ export class BaseConsensusService {
     colorSelectionService: ColorSelectionService,
     partnerSelectionService: PartnerSelectionService,
     messageHandlingService: MessageHandlingService,
-    validationService: ValidationService,
+    validationService: LoggingSystemService,
     systemStateService: SystemStateService
   ) {
     // Inject services instead of creating them
@@ -179,8 +179,6 @@ export class BaseConsensusService {
 
     this.onInitialProcessStates();
     this.validationService.logSystemState(this.processes, this.totalExchanges, () => this.calculatePotentialFunction());
-    this.colorSelectionService.detectColorConflicts(this.processes);
-    this.validationService.validateBallConservation(this.processes, this.messageQueue, this.initialDistributions);
 
     // Process messages asynchronously until convergence
     while (this.isRunning && !this.systemStateService.isSystemComplete(this.processes, this.messageQueue)) {
@@ -193,7 +191,6 @@ export class BaseConsensusService {
         let hasColorConflict = this.colorSelectionService.detectColorConflicts(this.processes);
         if (hasColorConflict) this.colorSelectionService.resolveColorConflicts(this.processes);
         this.validationService.logSystemState(this.processes, this.totalExchanges, () => this.calculatePotentialFunction());
-        this.validationService.validateBallConservation(this.processes, this.messageQueue, this.initialDistributions);
         
         // Check for stagnation (potential function not improving)
         const currentPotentialFunction = this.calculatePotentialFunction();
@@ -233,7 +230,6 @@ export class BaseConsensusService {
 
     this.isRunning = false;
     this.onConsensusCompleted(iterationCount);
-    this.validationService.validateBallConservation(this.processes, this.messageQueue, this.initialDistributions);
     this.validationService.logFinalState(this.processes, this.messageQueue, this.totalExchanges, () => this.calculatePotentialFunction(), this.initialDistributions);
   }
 

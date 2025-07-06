@@ -92,7 +92,6 @@ export class MessageHandlingService {
   ): void {
     if (!message.color) return;
 
-    // CRITICAL: Always accept balls, even if recipient is done, to preserve total count
     recipient.stack.push(message.color);
     totalExchanges.count++;
 
@@ -181,8 +180,7 @@ export class MessageHandlingService {
     // Find the dominant color in this process
     const dominantEntry = Array.from(processColorCounts.entries())
       .reduce((max, current) => current[1] > max[1] ? current : max);
-    
-    const dominantColor = dominantEntry[0];
+
     const dominantCount = dominantEntry[1];
 
     // For unequal distributions, a process is optimal if it has achieved 

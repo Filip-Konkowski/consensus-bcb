@@ -4,7 +4,7 @@ import { ApiController } from './api.controller';
 import { ColorSelectionService } from './services/color-selection.service';
 import { PartnerSelectionService } from './services/partner-selection.service';
 import { MessageHandlingService } from './services/message-handling.service';
-import { ValidationService } from './services/validation.service';
+import { LoggingSystemService } from './services/logging-system.service';
 import { SystemStateService } from './services/system-state.service';
 
 @Module({
@@ -14,7 +14,7 @@ import { SystemStateService } from './services/system-state.service';
     ColorSelectionService,
     PartnerSelectionService,
     MessageHandlingService,
-    ValidationService,
+    LoggingSystemService,
     SystemStateService,
   ],
   exports: [
@@ -22,7 +22,7 @@ import { SystemStateService } from './services/system-state.service';
     ColorSelectionService,
     PartnerSelectionService,
     MessageHandlingService,
-    ValidationService,
+    LoggingSystemService,
     SystemStateService,
   ],
 })

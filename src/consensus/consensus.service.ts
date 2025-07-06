@@ -3,7 +3,7 @@ import { BaseConsensusService } from './base-consensus.service';
 import { ColorSelectionService } from './services/color-selection.service';
 import { PartnerSelectionService } from './services/partner-selection.service';
 import { MessageHandlingService } from './services/message-handling.service';
-import { ValidationService } from './services/validation.service';
+import { LoggingSystemService } from './services/logging-system.service';
 import { SystemStateService } from './services/system-state.service';
 
 /**
@@ -18,7 +18,7 @@ export class ConsensusService extends BaseConsensusService {
     colorSelectionService: ColorSelectionService,
     partnerSelectionService: PartnerSelectionService,
     messageHandlingService: MessageHandlingService,
-    validationService: ValidationService,
+    validationService: LoggingSystemService,
     systemStateService: SystemStateService,
   ) {
     // Call parent constructor with injected services

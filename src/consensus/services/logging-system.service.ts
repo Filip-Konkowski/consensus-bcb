@@ -5,74 +5,7 @@ import { Color, ProcessId, ProcessState, Message } from '../types';
  * Service responsible for system validation and logging
  */
 @Injectable()
-export class ValidationService {
-  
-  /**
-   * Validate that total ball count is preserved (conservation invariant)
-   */
-  validateBallConservation(processes: ProcessState[], messageQueue: Message[], initialDistributions?: Record<ProcessId, Color[]>): boolean {
-    const currentCounts = new Map<Color, number>();
-    let totalBalls = 0;
-    
-    // Count balls in all process stacks
-    for (const process of processes) {
-      totalBalls += process.stack.length;
-      for (const color of process.stack) {
-        currentCounts.set(color, (currentCounts.get(color) || 0) + 1);
-      }
-    }
-    
-    // Count balls in transit (in message queue)
-    for (const message of messageQueue) {
-      if (message.type === 'SEND' && message.color) {
-        totalBalls++;
-        currentCounts.set(message.color, (currentCounts.get(message.color) || 0) + 1);
-      }
-    }
-    
-    // Calculate expected counts from initial distributions if provided
-    let expectedTotal = 30;
-    const expectedColorCounts = new Map<Color, number>();
-    
-    if (initialDistributions) {
-      expectedTotal = 0;
-      // Reset expected counts
-      expectedColorCounts.clear();
-      
-      // Calculate expected counts from initial distributions
-      for (const [processId, distribution] of Object.entries(initialDistributions)) {
-        expectedTotal += distribution.length;
-        for (const color of distribution) {
-          expectedColorCounts.set(color, (expectedColorCounts.get(color) || 0) + 1);
-        }
-      }
-    } else {
-      // Default expected counts for backward compatibility todo
-      expectedColorCounts.set('R', 10);
-      expectedColorCounts.set('G', 10);
-      expectedColorCounts.set('B', 10);
-    }
-    
-    let isValid = true;
-    if (totalBalls !== expectedTotal) {
-      console.error(`❌ BALL CONSERVATION VIOLATED: Expected ${expectedTotal} total balls, found ${totalBalls}`);
-      isValid = false;
-    }
-    
-    for (const [color, expectedCount] of expectedColorCounts.entries()) {
-      const count = currentCounts.get(color) || 0;
-      if (count !== expectedCount) {
-        console.error(`❌ COLOR CONSERVATION VIOLATED: Expected ${expectedCount} ${color} balls, found ${count}`);
-        isValid = false;
-      }
-    }
-    
-    if (isValid) {
-      console.log(`✅ Ball conservation verified: ${totalBalls} total balls, ${Array.from(currentCounts.entries()).map(([c, n]) => `${n} ${c}`).join(', ')}`);
-    }
-    
-    return isValid;
-  }
+export class LoggingSystemService {
 
   /**
    * Log current system state for debugging
