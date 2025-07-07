@@ -8,6 +8,7 @@ import {
   HttpCode
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ConsensusService } from './consensus.service';
 
 /**
  * REST API Controller for the Consensus Algorithm
@@ -18,18 +19,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 export class ApiController {
   private readonly logger = new Logger(ApiController.name);
 
-  // Simple mock state for now (until we fix the complex ConsensusService)
-  private mockState = {
-    processes: [
-      { id: 1, stack: ['R','R','R','G','G','G','B','B','B','R'], wanted: 'R', partner: null, isDone: false },
-      { id: 2, stack: ['G','G','G','R','R','B','B','B','R','R'], wanted: 'G', partner: null, isDone: false },
-      { id: 3, stack: ['B','B','B','B','R','G','G','G','G','R'], wanted: 'B', partner: null, isDone: false }
-    ],
-    messageQueue: [],
-    totalExchanges: 0,
-    isComplete: false,
-    potentialFunction: 15
-  };
+  constructor(private readonly consensusService: ConsensusService) {}
 
   /**
    * Start the consensus algorithm
@@ -43,21 +33,11 @@ export class ApiController {
     try {
       this.logger.log('Starting consensus algorithm via REST API');
       
-      // Simulate algorithm running
-      setTimeout(() => {
-        this.logger.log('Consensus algorithm completed (simulated)');
-        this.mockState.isComplete = true;
-        this.mockState.potentialFunction = 0;
-        // Simulate final state - each process has balls of one color
-        this.mockState.processes = [
-          { id: 1, stack: ['R','R','R','R','R','R','R','R','R','R'], wanted: 'R', partner: null, isDone: true },
-          { id: 2, stack: ['G','G','G','G','G','G','G','G','G','G'], wanted: 'G', partner: null, isDone: true },
-          { id: 3, stack: ['B','B','B','B','B','B','B','B','B','B'], wanted: 'B', partner: null, isDone: true }
-        ];
-      }, 2000);
+      // Start the real consensus algorithm
+      await this.consensusService.startConsensus();
       
       return {
-        message: 'Consensus algorithm started',
+        message: 'Consensus algorithm completed',
         started: true
       };
     } catch (error) {
@@ -79,18 +59,8 @@ export class ApiController {
   reset(): { message: string; reset: boolean } {
     this.logger.log('Resetting system via REST API');
     
-    // Reset mock state
-    this.mockState = {
-      processes: [
-        { id: 1, stack: ['R','R','R','G','G','G','B','B','B','R'], wanted: 'R', partner: null, isDone: false },
-        { id: 2, stack: ['G','G','G','R','R','B','B','B','R','R'], wanted: 'G', partner: null, isDone: false },
-        { id: 3, stack: ['B','B','B','B','R','G','G','G','G','R'], wanted: 'B', partner: null, isDone: false }
-      ],
-      messageQueue: [],
-      totalExchanges: 0,
-      isComplete: false,
-      potentialFunction: 15
-    };
+    // Reset the real consensus service
+    this.consensusService.reset();
     
     return {
       message: 'System reset to initial state',
@@ -105,7 +75,7 @@ export class ApiController {
   @ApiOperation({ summary: 'Get current system state' })
   @ApiResponse({ status: 200, description: 'Current system state' })
   getState(): any {
-    return this.mockState;
+    return this.consensusService.getSystemState();
   }
 
   /**
@@ -115,7 +85,7 @@ export class ApiController {
   @ApiOperation({ summary: 'Get system history' })
   @ApiResponse({ status: 200, description: 'System history' })
   getHistory(): any[] {
-    return [this.mockState]; // Return current state as history for now
+    return this.consensusService.getSystemHistory();
   }
 
   /**
@@ -126,7 +96,7 @@ export class ApiController {
   @ApiResponse({ status: 200, description: 'Current potential function value' })
   getPotentialFunction(): { value: number; description: string } {
     return {
-      value: this.mockState.potentialFunction,
+      value: this.consensusService.calculatePotentialFunction(),
       description: 'Total number of miscolored balls across all processes'
     };
   }
